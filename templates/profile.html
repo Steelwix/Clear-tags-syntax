@@ -1,0 +1,8 @@
+<?php $title = "My profile"; ?>
+<?php ob_start(); ?>
+
+<h1>My prfile</h1>
+<p>My first paragraph.</p>
+<?php $content = ob_get_clean(); ?>
+
+<?php require "base.html"; ?>
