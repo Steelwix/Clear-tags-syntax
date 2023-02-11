@@ -1,0 +1,49 @@
+<?php $title = "Quiz"; ?>
+<?php ob_start(); ?>
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1>LE QUIZZ</h1>
+        </div>
+        <div class="col-12">
+            <form action="/quiz" method="post">
+                <?php 
+                
+                foreach($questions as $question){
+    ?>
+                <h3>
+                    <?= $question['title']; ?>
+                </h3>
+                <p>
+                    <?= $question['question']; ?>
+                </p>
+        </div>
+        <div class="col-12">
+            <?php
+            
+            $filtered_answers = array_filter($answers, function($answer) use ($question) {
+                return $answer['question_id'] == $question['id'];
+              });
+              foreach($filtered_answers as $answer){
+          ?>
+
+            <p><i>
+                    <input type="radio" name="<?= $question['title'] ?>" value="<?= $answer['score'] ?>">
+                    <?= $answer['answer'] ?>
+                </i></p>
+            <?php
+        
+            }
+     ?>
+        </div>
+        <?php
+} 
+
+
+             $content = ob_get_clean(); 
+
+             require "base.html"; ?>
+        <input type="submit" value="Envoyer"></form>
+
+    </div>
+</div>

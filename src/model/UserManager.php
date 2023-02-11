@@ -1,7 +1,6 @@
 <?php
 require_once 'DatabaseManager.php';
 
-use DatabaseManager;
 
 class UserManager extends DatabaseManager
 {
