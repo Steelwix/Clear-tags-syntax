@@ -25,7 +25,7 @@ function loginController()
         $userManager = new UserManager();
         $users = $userManager->getUsers();
         foreach ($users as $user) {
-            if ($_POST['username'] == $user->getUsername() && $_POST['password'] == $user->getPassword()) {
+            if ($_POST['username'] == $user->getUsername() && password_verify($_POST['password'], $user->getPassword())) {
                 $_SESSION['username'] = $user->getUsername();
                 $_SESSION['id'] = $user->getId();
                 $_SESSION['bestScore'] = $user->getBestScore();

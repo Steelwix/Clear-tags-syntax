@@ -19,8 +19,8 @@ function registerController()
         if (empty(trim($_POST['password']))) {
             $password_err = "Vous devez entrer votre mot de passe.";
         }
-        $password = trim($_POST['password']);
-        $user = new User(null, $_POST['username'],  $_POST['password'], null, null, null);
+        $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
+        $user = new User(null, $_POST['username'],  $password, null, null, null);
         $userManager = new UserManager();
         $userManager->createUser($user);
         header("Location: /");
