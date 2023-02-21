@@ -1,7 +1,5 @@
 <?php
-
-
-function loginController()
+function registerController()
 {
     if (!isset($_POST['username']) or !isset($_POST['password'])) {
 
@@ -22,26 +20,11 @@ function loginController()
             $password_err = "Vous devez entrer votre mot de passe.";
         }
         $password = trim($_POST['password']);
+        $user = new User(null, $_POST['username'],  $_POST['password'], null, null, null);
         $userManager = new UserManager();
-        $users = $userManager->getUsers();
-        foreach ($users as $user) {
-            if ($_POST['username'] == $user['username'] and $_POST['password'] == $user['password']) {
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['id'] = $user['id'];
-                header("Location: /");
-                exit();
-            }
-            $login_err = "We don't recognize this username or this password";
-        }
+        $userManager->createUser($user);
+        header("Location: /");
+        exit();
     }
-    require './templates/login.html';
-}
-function logoutController()
-{
-    session_destroy();
-    foreach ($_SESSION as $session) {
-        unset($session);
-    }
-    header("Location: /");
-    exit();
+    require './templates/register.html';
 }

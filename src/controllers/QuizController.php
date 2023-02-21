@@ -5,11 +5,8 @@ function quizController()
     $questionManager = new QuestionManager();
     $answerManager = new AnswerManager();
     $questions = $questionManager->getQuestions();
-    $rawAnswers = $answerManager->getAnswers();
+    $answers = $answerManager->getAnswers();
 
-    foreach ($rawAnswers as $raw) {
-        $answers[] = $raw;
-    }
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $total = 0;
         foreach ($_POST as $score) {

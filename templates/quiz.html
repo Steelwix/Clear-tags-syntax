@@ -8,28 +8,29 @@
         <div class="col-12">
             <form action="/quiz" method="post">
                 <?php 
-                
+
                 foreach($questions as $question){
+
     ?>
                 <h3>
-                    <?= $question['title']; ?>
+                    <?= $question->getTitle(); ?>
                 </h3>
                 <p>
-                    <?= $question['question']; ?>
+                    <?= $question->getQuestion(); ?>
                 </p>
         </div>
         <div class="col-12">
             <?php
             
             $filtered_answers = array_filter($answers, function($answer) use ($question) {
-                return $answer['question_id'] == $question['id'];
+                return $answer->getQuestion() == $question;
               });
               foreach($filtered_answers as $answer){
           ?>
 
             <p><i>
-                    <input type="radio" name="<?= $question['title'] ?>" value="<?= $answer['score'] ?>" required>
-                    <?= $answer['answer'] ?>
+                    <input type="radio" name="<?= $question->getTitle() ?>" value="<?= $answer->getScore() ?>" required>
+                    <?= $answer->getAnswer() ?>
                 </i></p>
             <?php
         

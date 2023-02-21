@@ -5,7 +5,7 @@ session_start();
 
 $routes = [
     '/' => 'homeController', '/profile' => 'profileController', '/login' => 'loginController', '/quiz' => 'quizController',
-    '/result' => 'resultController'
+    '/result' => 'resultController', '/register' => 'registerController', '/logout' => 'logoutController'
 ];
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -19,9 +19,13 @@ $models = glob('src/model/*.php');
 foreach ($models as $model) {
     require_once $model;
 }
-$files = glob('src/controllers/*.php');
-foreach ($files as $file) {
-    include $file;
+$controllers = glob('src/controllers/*.php');
+foreach ($controllers as $controller) {
+    include $controller;
+}
+$entities = glob('src/entity/*.php');
+foreach ($entities as $entity) {
+    include $entity;
 }
 
 
