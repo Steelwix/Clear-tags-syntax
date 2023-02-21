@@ -14,7 +14,7 @@ class QuestionManager extends DatabaseManager
         }
         return $questions;
     }
-    public function getQuestionWithId(int $id)
+    public function getQuestionById(int $id)
     {
         $req = $this->database->prepare('SELECT * FROM question WHERE id = :id');
         $req->bindValue(':id', $id, PDO::PARAM_INT);

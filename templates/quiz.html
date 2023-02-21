@@ -29,7 +29,7 @@
           ?>
 
             <p><i>
-                    <input type="radio" name="<?= $question->getTitle() ?>" value="<?= $answer->getScore() ?>" required>
+                    <input type="radio" name="<?= $question->getId() ?>" value="<?= $answer->getId() ?>" required>
                     <?= $answer->getAnswer() ?>
                 </i></p>
             <?php

@@ -25,9 +25,11 @@ function loginController()
         $userManager = new UserManager();
         $users = $userManager->getUsers();
         foreach ($users as $user) {
-            if ($_POST['username'] == $user['username'] and $_POST['password'] == $user['password']) {
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['id'] = $user['id'];
+            if ($_POST['username'] == $user->getUsername() && $_POST['password'] == $user->getPassword()) {
+                $_SESSION['username'] = $user->getUsername();
+                $_SESSION['id'] = $user->getId();
+                $_SESSION['bestScore'] = $user->getBestScore();
+                $_SESSION['lastScore'] = $user->getLastScore();
                 header("Location: /");
                 exit();
             }
