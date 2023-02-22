@@ -8,6 +8,5 @@ function homeController()
 }
 function profileController()
 {
-    $username = "Steelwix";
     require './templates/profile.html';
 }

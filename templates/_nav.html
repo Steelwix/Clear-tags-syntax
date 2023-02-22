@@ -16,10 +16,16 @@
                         <?= $_SESSION['username'] ?>
                     </a>
                 </li>
+                <?php $userManager = new UserManager;
+                $user = $userManager->getUser();
+                if($user->getRoles() == "ROLE_ADMIN"){ ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">Admin</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Se déconnecter</a>
                 </li>
-                <?php } else { ?>
+                <?php }} else { ?>
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Se connecter</a>
                 </li>

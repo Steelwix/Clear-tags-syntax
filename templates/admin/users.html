@@ -1,0 +1,45 @@
+<?php $title = "Admin"; ?>
+<?php ob_start(); ?>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1>
+                <i>UTILISATEURS</i>
+            </h1>
+        </div>
+        <div class="row">
+            <?php foreach($users as $user){ ?>
+            <div class="card bg-dark col-2 mh-500 d-flex align-items-stretch">
+
+                <img class="card-img-top rounded"
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/OOjs_UI_icon_userAvatar-progressive.svg/1200px-OOjs_UI_icon_userAvatar-progressive.svg.png"
+                    alt="Card image cap">
+                <div class="card-title text-center">
+                    <p>
+                        <strong>
+                            <?= $user->getUsername() ?>
+                        </strong>
+                    </p>
+
+                    <div class="card-content text-center"></div>
+                    <a type="button" class="btn btn-dark" href="">
+                        <i class="bi bi-pen-fill">
+                            Modifier</i>
+                    </a>
+                    <a type="button" class="btn btn-dark" href="">
+                        <i class="bi bi-trash-fill">Supprimer</i>
+
+                    </a>
+                </div>
+
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<?php 
+
+$content = ob_get_clean(); ?>
+
+<?php require "./templates/base.html"; ?>

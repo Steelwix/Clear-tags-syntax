@@ -5,7 +5,8 @@ session_start();
 
 $routes = [
     '/' => 'homeController', '/profile' => 'profileController', '/login' => 'loginController', '/quiz' => 'quizController',
-    '/result' => 'resultController', '/register' => 'registerController', '/logout' => 'logoutController'
+    '/result' => 'resultController', '/register' => 'registerController', '/logout' => 'logoutController', '/admin' => 'homeAdminController',
+    '/admin/users' => 'userManageController', '/admin/questions' => 'questionManageController', '/admin/results' => 'resultController'
 ];
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
