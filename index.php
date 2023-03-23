@@ -1,5 +1,17 @@
-public function removeDuplicatedTagsInString(): array
+    public function removeDuplicatedTagsInString(): array
     {
+        //Upper or lower case?
+        // Do I keep high-tech, hightech or high tech?
+        //Ban "Produit"
+
+        //    public function newTag($tag, $supplier_id,)
+        //    {
+        //        $newTag = $this->dataBase->prepare("INSERT INTO Tags(id, value) VALUES (NULL, :tag)");
+        //        $newTag->execute(array(':tag' => $tag));
+        //          $tag_id = $this->dataBase->lastInsertId();
+        //         $linkTag = $this->dataBase->prepare("INSERT INTO SupplierTag(id, supplier_id, tag_id, weight) VALUES (NULL, :supplier_id, :tag_id, NULL)");
+        //        $linkTag->execute(array(':supplier_id' => $supplier_id, ':tag_id' => $tag_id ));
+        //    }
         $file = fopen('../value.csv', 'r');
 
     $tags = array();
