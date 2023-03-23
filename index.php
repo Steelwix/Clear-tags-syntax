@@ -1,7 +1,7 @@
-   public function removeDuplicatedTagsInString(): Response
+ public function removeDuplicatedTagsInString(): Response
     {
 
-        $tags = array("couteau", "champagnes", "champagne", "champane", "voiture", "couteaux", "couteaux", "champagne", "élèctrique", "Chocolat / bonbons");
+        $tags = $this->tags;
         echo '<pre>', var_dump($tags), '</pre>';
         $tags_count = array_count_values($tags); //Classer les tags par fréquence
         asort($tags_count);
@@ -43,7 +43,7 @@
                     break; //Relancement du foreach avec le nouvel array
 
                 }
-                $this->pluralChecker($tags, $tag);
+
                 $subTag = substr($tag, -1); //Detection de la dernière lettre du tag
                 if($subTag === " "){ //Retire l'espace à la fin du tag si il y en a un
                     $clearTag = substr($tag, 0, -1);
@@ -52,28 +52,12 @@
                     $reversed_tags_count = $update[1];
                     break; //Relancement du foreach avec le nouvel array
                 }
-                if ($subTag === "s" || $subTag === "x") { //Si la dernière lettre peut symboliser le pluriel
-
-                    $singular = substr($tag, 0, -1);    // On définit une variable $singular qui représente notre tag au singulier
-
-
-                    if (in_array($singular, $tags)) { //Si le tag au singulier existe dans l'array de la bdd
-                        $update = $this->updateTagsArray($tags, $singular, $tag);
-                        $tags = $update[0];
-                        $reversed_tags_count = $update[1];
-                        break; //Relancement du foreach avec le nouvel array
-
-                    }
-                } else { //Si la derniere lettre n'est pas synonyme de pluriel
-                    $plural = $tag  . "s"; // On définit une variable $plural qui représente notre tag au pluriel
-                    if (in_array($plural, $tags)) { //Si le tag au pluriel existe dans l'array de la bdd
-                        $update = $this->updateTagsArray($tags, $plural, $tag);
-                        $tags = $update[0];
-                        $reversed_tags_count = $update[1];
-                        break; //Relancement du foreach avec le nouvel array
-                    }
+                $update = $this->pluralChecker($tags, $tag, $subTag);
+                if(isset($update)){
+                    $tags = $update[0];
+                    $reversed_tags_count = $update[1];
+                    break; //Relancement du foreach avec le nouvel array
                 }
-
 
                 $clearTag = $this->supprimerAccents($tag, true, null, ['(', ')', ' ', '-']); //Retire les symboles
                 $key = array_keys($tags, $tag); //Remplace le tag d'origine par le tag formaté
@@ -87,15 +71,29 @@
 
         die();
     }
-    public function pluralChecker(array $array, string $string){
+    public function pluralChecker(array $array, string $string, string $subString){
+        if ($subString === "s" || $subString === "x") { //Si la dernière lettre peut symboliser le pluriel
+            $singular = substr($string, 0, -1);    // On définit une variable $singular qui représente notre tag au singulier
+
+
+            if (in_array($singular, $array)) { //Si le tag au singulier existe dans l'array de la bdd
+                $update = $this->updateTagsArray($array, $singular, $string);
+
+            }
+        } else { //Si la derniere lettre n'est pas synonyme de pluriel
+            $plural = $string  . "s"; // On définit une variable $plural qui représente notre tag au pluriel
+            if (in_array($plural, $array)) { //Si le tag au pluriel existe dans l'array de la bdd
+                $update = $this->updateTagsArray($array, $plural, $string);
+            }
+        }
+        if(isset($update)){
+    return $update;
+        }
 
     }
         public function dismantleSlashedTags($string, $matches): string
         {
-//            foreach ($matches in $match){
-//            $splitedTags = explode($match, $string);
-//            //check singular and plural
-//        }
+
 
             $clearString = str_replace('/', ' et ', $string);
             $fullClearString = str_replace('&', 'et', $clearString);
