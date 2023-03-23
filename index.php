@@ -1,7 +1,7 @@
- public function removeDuplicatedTagsInString(): Response
+   public function removeDuplicatedTagsInString(): Response
     {
 
-        $tags = $this->tags;
+        $tags = array("couteau", "champagnes", "champagne", "champane", "voiture", "couteaux", "couteaux", "champagne", "élèctrique", "Chocolat / bonbons");
         echo '<pre>', var_dump($tags), '</pre>';
         $tags_count = array_count_values($tags); //Classer les tags par fréquence
         asort($tags_count);
@@ -95,10 +95,10 @@
         {
 
 
-            $clearString = str_replace('/', ' et ', $string);
-            $fullClearString = str_replace('&', 'et', $clearString);
-            $megaClearString = str_replace(',', ' et', $fullClearString);
-            return $megaClearString;
+            $string = str_replace('/', ' et ', $string);
+            $string = str_replace('&', 'et', $string);
+            $string = str_replace(',', ' et', $string);
+            return $string;
         }
         public function dismanteApostrophe($string): string
         {
@@ -145,7 +145,7 @@
         $reversed_array_count = array_reverse($array_count);
         $result[0] = $array;
         $result[1] = $reversed_array_count;
-        ;echo '<pre>', 'updating tags ', var_dump($array), '</pre>';
+        echo '<pre>', 'updating tags ', var_dump($array), '</pre>';
         return $result;
 
     }
