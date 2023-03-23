@@ -1,4 +1,4 @@
-public function removeDuplicatedTagsInString(): Response
+    public function removeDuplicatedTagsInString(): Response
     {
 
         $tags = array("couteau", "champagnes", "champagne", "champane", "voiture", "couteaux", "couteaux", "champagne", "élèctrique", "Chocolat / bonbons");
@@ -10,109 +10,141 @@ public function removeDuplicatedTagsInString(): Response
         $clearTags = false;
 
         while ($clearTags === false) {
-            end($reversed_tags_count);
+            end($reversed_tags_count); //Identification du dernier tag de l'array
             $lastElement = key($reversed_tags_count);
             echo '<pre>', "starting foreach", '</pre>';
-            foreach ($reversed_tags_count as $tag => $count) { //Foreach qui va vérifier les tags dans l'odre de fréquence
+            foreach ($reversed_tags_count as $tag => $count) {
 
-                $subTag = substr($tag, -1);
+                //Foreach qui va vérifier les tags dans l'odre de fréquence
+
+                if(preg_match('/[A-Z]/', $tag)){
+                    $lowTag = $this->removeCaps($tag); //Retire les uppercase
+
+                    $update = $this->updateTagsArray($tags, $tag, $lowTag);
+                    $tags = $update[0];
+                    $reversed_tags_count = $update[1];
+                    break; //Relancement du foreach avec le nouvel array
+
+                }
+                if (preg_match('/[\&\,\/]/', $tag, $matches)) { //Les symboles / & et , sont remplacés par "et"
+                    $clearTag = $this->dismantleSlashedTags($tag, $matches);
+                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
+                    $tags = $update[0];
+                    $reversed_tags_count = $update[1];
+                    break; //Relancement du foreach avec le nouvel array
+
+
+                }
+                if (preg_match('/\'/', $tag)) { // L'apostrophe est remplacé par un espace
+                    $clearTag = $this->dismanteApostrophe($tag);
+                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
+                    $tags = $update[0];
+                    $reversed_tags_count = $update[1];
+                    break; //Relancement du foreach avec le nouvel array
+
+                }
+                $subTag = substr($tag, -1); //Detection de la dernière lettre du tag
+                if($subTag === " "){ //Retire l'espace à la fin du tag si il y en a un
+                    $clearTag = substr($tag, 0, -1);
+                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
+                    $tags = $update[0];
+                    $reversed_tags_count = $update[1];
+                    break; //Relancement du foreach avec le nouvel array
+                }
                 if ($subTag === "s" || $subTag === "x") { //Si la dernière lettre peut symboliser le pluriel
-                    echo '<pre>', " plural detected in " . $tag, '</pre>';
+
                     $singular = substr($tag, 0, -1);    // On définit une variable $singular qui représente notre tag au singulier
-                    echo '<pre>', "singular is :" . $singular, '</pre>';
+
 
                     if (in_array($singular, $tags)) { //Si le tag au singulier existe dans l'array de la bdd
-                        echo '<pre>', $singular . " detected in tags ", '</pre>';
-                        $keys = array_keys($tags, $singular);
-                        foreach ($keys as $key => $value) {
-                            $tags[$value] = $tag; //On le remplace par sa version au pluriel, qui est plus fréquente.
-                            //Note : on utilise pas strtr_replace car la méthode va bouclier en remplacant "maisons" par "maisonss"
-                        }
-                        $tags_count = array_count_values($tags); //Rafraichissement des arrays
-                        asort($tags_count);
-                        $reversed_tags_count = array_reverse($tags_count);
-                        echo '<pre>', var_dump($tags), '</pre>';
+                        $update = $this->updateTagsArray($tags, $singular, $tag);
+                        $tags = $update[0];
+                        $reversed_tags_count = $update[1];
                         break; //Relancement du foreach avec le nouvel array
 
                     }
                 } else { //Si la derniere lettre n'est pas synonyme de pluriel
-                    echo '<pre>', " no plural " . $tag, '</pre>';
                     $plural = $tag  . "s"; // On définit une variable $plural qui représente notre tag au pluriel
-                    echo '<pre>', "plural is :" . $plural, '</pre>';
                     if (in_array($plural, $tags)) { //Si le tag au pluriel existe dans l'array de la bdd
-                        echo '<pre>', $plural . " detected in tags ", '</pre>';
-                        $keys = array_keys($tags, $plural);
-                        foreach ($keys as $key => $value) {
-                            $tags[$value] = $tag; //On le remplace par sa version au singulier, qui est plus fréquente
-                        }
-
-                        $tags_count = array_count_values($tags); //Rafraichissement des arrays
-                        asort($tags_count);
-                        $reversed_tags_count = array_reverse($tags_count);
-                        echo '<pre>', var_dump($tags), '</pre>';
+                        $update = $this->updateTagsArray($tags, $plural, $tag);
+                        $tags = $update[0];
+                        $reversed_tags_count = $update[1];
                         break; //Relancement du foreach avec le nouvel array
                     }
                 }
-                if (preg_match('/\//', $tag)) {
-                    $tagKey = array_keys($tags, $tag);
-                    $slashCleared = $this->dismantleSlashedTags($tag);
-                    unset($tags[$tagKey[0]]);
-                    foreach ($slashCleared as $newTag) {
-                        $tags[] = $newTag;
-                    }
-                    $tags_count = array_count_values($tags); //Rafraichissement des arrays
-                    asort($tags_count);
-                    $reversed_tags_count = array_reverse($tags_count);
-                    echo '<pre>', var_dump($tags), '</pre>';
-                    break; //Relancement du foreach avec le nouvel array
 
-                }
-                $lowTag = $this->removeCaps($tag);
-                $clearTag = $this->supprimerAccents($lowTag, true, null, ['(', ')']);
-                $key = array_keys($tags, $tag);
+
+                $clearTag = $this->supprimerAccents($tag, true, null, ['(', ')', ' ', '-']); //Retire les symboles
+                $key = array_keys($tags, $tag); //Remplace le tag d'origine par le tag formaté
                 $tags[$key[0]] = $clearTag;
-                if ($tag == $lastElement) {
-                    echo '<pre>', 'tags are ready to go', '</pre>';
+                if ($tag == $lastElement) { //Si le tag analysé est le dernier du tableau, alors on arrête le script
+                    echo '<pre>', 'tags are ready to go : ',var_dump($tags), '</pre>';
                     $clearTags = true;
                 }
             }
         }
 
         die();
-        return $this->render('mess/index.html.twig');
     }
-    public function dismantleSlashedTags($string): array
-    {
-        $splitedTags = explode("/", $string);
-        return $splitedTags;
-    }
-    public function supprimerAccents(string $string, bool $remove_special_char = true, ?string $replace_space = null, array $exceptions = []): string
-    {
-        $string = transliterator_transliterate('Any-Latin; Latin-ASCII;', $string);
-        $string = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
 
-        if ($remove_special_char) $string = $this->supprimerSpecialChar($string, $exceptions);
-        $string = preg_replace('/\s+/', ' ', $string);
+        public function dismantleSlashedTags($string, $matches): string
+        {
+//            foreach ($matches in $match){
+//            $splitedTags = explode($match, $string);
+//            //check singular and plural
+//        }
 
-        $string = trim($string);
-        if ($replace_space !== null) $string = str_replace(' ', $replace_space, $string);
-
-        return $string;
-    }
-    public function supprimerSpecialChar(string $string, array $exceptions = []): string
-    {
-        $regex = '/[^\p{L}';
-
-        foreach ($exceptions as $exception) {
-            $regex .= '\\' . $exception;
+            $clearString = str_replace('/', ' et ', $string);
+            $fullClearString = str_replace('&', 'et', $clearString);
+            $megaClearString = str_replace(',', ' et', $fullClearString);
+            return $megaClearString;
         }
+        public function dismanteApostrophe($string): string
+        {
+            $clearString = str_replace('\'', ' ', $string);
+            return $clearString;
+        }
+        public function supprimerAccents(string $string, bool $remove_special_char = true, ?string $replace_space = null, array $exceptions = []): string
+        {
+            $string = transliterator_transliterate('Any-Latin; Latin-ASCII;', $string);
+            $string = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
 
-        $regex .= ']/u';
+            if ($remove_special_char) $string = $this->supprimerSpecialChar($string, $exceptions);
+            $string = preg_replace('/\s+/', ' ', $string);
 
-        return preg_replace($regex, '', $string);
-    }
-    public function removeCaps($string): string
-    {
-        $string = strtolower($string);
-        return $string;
+            $string = trim($string);
+            if ($replace_space !== null) $string = str_replace(' ', $replace_space, $string);
+
+            return $string;
+        }
+        public function supprimerSpecialChar(string $string, array $exceptions = []): string
+        {
+            $regex = '/[^\p{L}';
+
+            foreach ($exceptions as $exception) {
+                $regex .= '\\' . $exception;
+            }
+
+            $regex .= ']/u';
+
+            return preg_replace($regex, '', $string);
+        }
+        public function removeCaps($string): string
+        {
+            $string = strtolower($string);
+            return $string;
+        }
+    public function updateTagsArray(array $array, string $oldValue, string $newValue): array{
+        $keys = array_keys($array, $oldValue);
+        foreach ($keys as $key => $value) {
+            $array[$value] = $newValue;
+        }
+        $array_count = array_count_values($array); //Rafraichissement des arrays
+        asort($array_count);
+        $reversed_array_count = array_reverse($array_count);
+        $result[0] = $array;
+        $result[1] = $reversed_array_count;
+        ;echo '<pre>', 'updating tags ', var_dump($array), '</pre>';
+        return $result;
+
     }
