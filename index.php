@@ -1,4 +1,4 @@
-    public function removeDuplicatedTagsInString(): Response
+   public function removeDuplicatedTagsInString(): Response
     {
 
         $tags = array("couteau", "champagnes", "champagne", "champane", "voiture", "couteaux", "couteaux", "champagne", "élèctrique", "Chocolat / bonbons");
@@ -43,6 +43,7 @@
                     break; //Relancement du foreach avec le nouvel array
 
                 }
+                $this->pluralChecker($tags, $tag);
                 $subTag = substr($tag, -1); //Detection de la dernière lettre du tag
                 if($subTag === " "){ //Retire l'espace à la fin du tag si il y en a un
                     $clearTag = substr($tag, 0, -1);
@@ -86,7 +87,9 @@
 
         die();
     }
+    public function pluralChecker(array $array, string $string){
 
+    }
         public function dismantleSlashedTags($string, $matches): string
         {
 //            foreach ($matches in $match){
