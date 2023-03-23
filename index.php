@@ -1,7 +1,17 @@
-   public function removeDuplicatedTagsInString(): Response
+public function removeDuplicatedTagsInString(): array
     {
+        $file = fopen('../value.csv', 'r');
 
-        $tags = array("couteau", "champagnes", "champagne", "champane", "voiture", "couteaux", "couteaux", "champagne", "élèctrique", "Chocolat / bonbons");
+    $tags = array();
+        while (($results = fgetcsv($file)) !== false)
+        {
+            foreach ($results as $result){
+                $tags[] = $result;
+            }
+
+        }
+
+        fclose($file);
         echo '<pre>', var_dump($tags), '</pre>';
         $tags_count = array_count_values($tags); //Classer les tags par fréquence
         asort($tags_count);
@@ -20,26 +30,20 @@
                 if(preg_match('/[A-Z]/', $tag)){
                     $lowTag = $this->removeCaps($tag); //Retire les uppercase
 
-                    $update = $this->updateTagsArray($tags, $tag, $lowTag);
-                    $tags = $update[0];
-                    $reversed_tags_count = $update[1];
+                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags, $tag, $lowTag);
                     break; //Relancement du foreach avec le nouvel array
 
                 }
                 if (preg_match('/[\&\,\/]/', $tag, $matches)) { //Les symboles / & et , sont remplacés par "et"
                     $clearTag = $this->dismantleSlashedTags($tag, $matches);
-                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
-                    $tags = $update[0];
-                    $reversed_tags_count = $update[1];
+                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags, $tag, $clearTag);
                     break; //Relancement du foreach avec le nouvel array
 
 
                 }
                 if (preg_match('/\'/', $tag)) { // L'apostrophe est remplacé par un espace
-                    $clearTag = $this->dismanteApostrophe($tag);
-                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
-                    $tags = $update[0];
-                    $reversed_tags_count = $update[1];
+                    $clearTag = $this->dismantleApostrophe($tag);
+                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags, $tag, $clearTag);
                     break; //Relancement du foreach avec le nouvel array
 
                 }
@@ -47,15 +51,12 @@
                 $subTag = substr($tag, -1); //Detection de la dernière lettre du tag
                 if($subTag === " "){ //Retire l'espace à la fin du tag si il y en a un
                     $clearTag = substr($tag, 0, -1);
-                    $update = $this->updateTagsArray($tags, $tag, $clearTag);
-                    $tags = $update[0];
-                    $reversed_tags_count = $update[1];
+                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags, $tag, $clearTag);
                     break; //Relancement du foreach avec le nouvel array
                 }
                 $update = $this->pluralChecker($tags, $tag, $subTag);
-                if(isset($update)){
-                    $tags = $update[0];
-                    $reversed_tags_count = $update[1];
+                if(is_array($update)){
+                    list($tags, $reversed_tags_count) = $this->pluralChecker($tags, $tag, $subTag);
                     break; //Relancement du foreach avec le nouvel array
                 }
 
@@ -68,8 +69,17 @@
                 }
             }
         }
+        $file = fopen('../output.csv', 'w');
+    $export = array();
+        foreach ($tags as $tag){
+            $export[] = array($tag);
+        }
+        foreach ($export as $fields){
+            fputcsv($file, $fields);
+        }
 
-        die();
+        fclose($file);
+        return $tags;
     }
     public function pluralChecker(array $array, string $string, string $subString){
         if ($subString === "s" || $subString === "x") { //Si la dernière lettre peut symboliser le pluriel
@@ -93,32 +103,42 @@
     }
         public function dismantleSlashedTags($string, $matches): string
         {
+            foreach ($matches as $match){ //Peu importe le symbole detecté, on le remplace par "et"
+                switch($match){
+                    case '/':
+                        $string = str_replace('/', ' et ', $string);
+                        break;
+                    case '&':
+                        $string = str_replace('&', 'et', $string);
+                        break;
+                    case ',':
+                        $string = str_replace(',', ' et', $string);
+                        break;
+                }
+            }
 
-
-            $string = str_replace('/', ' et ', $string);
-            $string = str_replace('&', 'et', $string);
-            $string = str_replace(',', ' et', $string);
             return $string;
         }
-        public function dismanteApostrophe($string): string
+        public function dismantleApostrophe($string): string
         {
-            $clearString = str_replace('\'', ' ', $string);
+            $clearString = str_replace('\'', ' ', $string);// Remplacement des apostrophes par un espace
             return $clearString;
         }
         public function supprimerAccents(string $string, bool $remove_special_char = true, ?string $replace_space = null, array $exceptions = []): string
         {
             $string = transliterator_transliterate('Any-Latin; Latin-ASCII;', $string);
-            $string = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string);
+            $string = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $string); //Adaptation du format texte pour supprimer
+            //les accents
 
-            if ($remove_special_char) $string = $this->supprimerSpecialChar($string, $exceptions);
-            $string = preg_replace('/\s+/', ' ', $string);
+            if ($remove_special_char) $string = $this->supprimerSpecialChar($string, $exceptions); //Suppression des symboles
+            $string = preg_replace('/\s+/', ' ', $string); //Refactorisation des espaces de trop
 
             $string = trim($string);
             if ($replace_space !== null) $string = str_replace(' ', $replace_space, $string);
 
             return $string;
         }
-        public function supprimerSpecialChar(string $string, array $exceptions = []): string
+        public function supprimerSpecialChar(string $string, array $exceptions = []): string //Suppression caractères spéciaux
         {
             $regex = '/[^\p{L}';
 
@@ -130,21 +150,21 @@
 
             return preg_replace($regex, '', $string);
         }
-        public function removeCaps($string): string
+        public function removeCaps($string): string //Transformation des majuscules en minuscules
         {
             $string = strtolower($string);
             return $string;
         }
     public function updateTagsArray(array $array, string $oldValue, string $newValue): array{
-        $keys = array_keys($array, $oldValue);
+        $keys = array_keys($array, $oldValue); //Detection du tag a modifier dans le tableau des tags
         foreach ($keys as $key => $value) {
-            $array[$value] = $newValue;
+            $array[$value] = $newValue; //Assignation de la nouvelle valeur
         }
         $array_count = array_count_values($array); //Rafraichissement des arrays
         asort($array_count);
         $reversed_array_count = array_reverse($array_count);
-        $result[0] = $array;
-        $result[1] = $reversed_array_count;
+        $result[0] = $array; //La nouvelle valeur de $tags est stockée dans $result[0]
+        $result[1] = $reversed_array_count;//La nouvelle valeur de reverses_tag_count est stockée dans $result[1]
         echo '<pre>', 'updating tags ', var_dump($array), '</pre>';
         return $result;
 
