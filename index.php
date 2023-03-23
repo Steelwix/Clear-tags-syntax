@@ -47,8 +47,8 @@
 
                 }
                 if (preg_match('/[\&\,\/]/', $tag, $matches)) { //Les symboles / & et , sont remplacés par "et"
-                    $clearTag = $this->dismantleSlashedTags($tag, $matches);
-                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags, $tag, $clearTag);
+                    $tags = $this->dismantleSlashedTags($tags, $tag, $matches);
+                    list($tags, $reversed_tags_count) = $this->updateTagsArray($tags);
                     break; //Relancement du foreach avec le nouvel array
 
 
@@ -113,23 +113,13 @@
         }
 
     }
-        public function dismantleSlashedTags($string, $matches): string
+        public function dismantleSlashedTags(array $array, string $string, array $matches)
         {
-            foreach ($matches as $match){ //Peu importe le symbole detecté, on le remplace par "et"
-                switch($match){
-                    case '/':
-                        $string = str_replace('/', ' et ', $string);
-                        break;
-                    case '&':
-                        $string = str_replace('&', 'et', $string);
-                        break;
-                    case ',':
-                        $string = str_replace(',', ' et', $string);
-                        break;
-                }
+            $splitedTags = explode($matches, $string);
+            foreach($splitedTags as $tag){
+                $array[] = $tag;
             }
-
-            return $string;
+            return $array;
         }
         public function dismantleApostrophe($string): string
         {
@@ -167,11 +157,14 @@
             $string = strtolower($string);
             return $string;
         }
-    public function updateTagsArray(array $array, string $oldValue, string $newValue): array{
-        $keys = array_keys($array, $oldValue); //Detection du tag a modifier dans le tableau des tags
-        foreach ($keys as $key => $value) {
-            $array[$value] = $newValue; //Assignation de la nouvelle valeur
+    public function updateTagsArray(array $array, ?string $oldValue = null, ?string $newValue = null): array{
+        if($oldValue != null || $newValue != null){
+            $keys = array_keys($array, $oldValue); //Detection du tag a modifier dans le tableau des tags
+            foreach ($keys as $key => $value) {
+                $array[$value] = $newValue; //Assignation de la nouvelle valeur
+            }
         }
+
         $array_count = array_count_values($array); //Rafraichissement des arrays
         asort($array_count);
         $reversed_array_count = array_reverse($array_count);
