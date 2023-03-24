@@ -135,12 +135,17 @@
                     $keys = array_keys($tags, $tag);
                     foreach ($keys as $key=>$value){
                         if($tagKey != $value){
-                            echo '<pre style="background-color:yellow">', 'DETECTED DOUBLE TAGS ON ',var_dump($tags[$tagKey]),var_dump($tagKey),var_dump($tags[$value]),var_dump($value), '</pre>';
-                            if($database[$tagKey]['id'] != $database[$value]['id'] && $database[$value]['id'] != null){
-                                echo '<pre style="background-color:orange">', '$database[$tagKey][id] = ',var_dump($database[$tagKey]['id']), '</pre>';
-                                echo '<pre style="background-color:orange">', '$database[$value][id] = ',var_dump($database[$value]['id']), '</pre>';
-                                echo '<pre style="background-color:orange">', 'Reassinging  ',var_dump($tag), '</pre>';
-                                list($tags, $database) =$this->reassignFormatedTag($database, $tags, $tagKey, $value);
+                            echo '<pre style="background-color:yellow">', 'DETECTED DOUBLE TAGS ON ',var_dump($database[$tagKey]),var_dump($database[$value]), '</pre>';
+                            if($database[$tagKey]['id'] != $database[$value]['id']){
+                                if($database[$value]['id'] == null){
+                                    echo '<pre style="background-color:orange">', 'ID IS NULL  ', '</pre>';
+                                    list($tags, $database) =$this->reassignFormatedTag($database, $tags, $value, $tagKey);
+                                }
+                                else {
+                                    echo '<pre style="background-color:orange">', 'Reassinging  ',var_dump($tag), '</pre>';
+                                    list($tags, $database) =$this->reassignFormatedTag($database, $tags, $tagKey, $value);
+                                }
+
 
 
                                 list($tags, $reversed_tags_count, $database) = $this->updateTagsArray($tags, $database , $tag, $clearTag);
@@ -180,7 +185,7 @@
     unset($database[$tagKey]);
     $array[] = $formatedTag['tag'];
     $database[] =   $newTag;
-        echo '<pre style="background-color:#0aa2c0">','DATABASE REASSIGNED WITH  : ',var_dump($newTag), var_dump($database), '</pre>';
+        //echo '<pre style="background-color:#0aa2c0">','DATABASE REASSIGNED WITH  : ',var_dump($newTag), var_dump($database), '</pre>';
         $result[0] = $array; //La nouvelle valeur de $tags est stockée dans $result[0]
         $result[1] = $database;
         return $result;
@@ -226,7 +231,7 @@
                         unset($database[$tagKey]);
                         $array[] = $formatedTag['tag'];
                         $database[] =   $newTag;
-                    echo '<pre style="background-color:#0aa2c0">','DATABASE REASSIGNED WITH  : ',var_dump($newTag), var_dump($database), '</pre>';
+                    //echo '<pre style="background-color:#0aa2c0">','DATABASE REASSIGNED WITH  : ',var_dump($newTag), var_dump($database), '</pre>';
                         $result[0] = $array; //La nouvelle valeur de $tags est stockée dans $result[0]
                         $result[1] = $database;
 
@@ -286,7 +291,7 @@
         $result[2] = $database;
 
 
-        echo '<pre style="background-color:#4dd4ac">', 'tag updates ', '</pre>';
+        //echo '<pre style="background-color:#4dd4ac">', 'tag updates ', '</pre>';
 
 
         return $result;
