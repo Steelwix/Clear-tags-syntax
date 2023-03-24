@@ -18,6 +18,7 @@
 
     $tags = array();
     $database = array();
+    $trash = array();
     $i = 0;
 
 //        while (($results = fgetcsv($file)) !== false)
@@ -30,25 +31,25 @@
 //            }
         //fclose($file);
         // FAKE CSV FILE
-//            $database[0]['id'] = 1;
-//           $database[0]['tag'] = "champagnes";
-//            $database[0]['supplier_id']= 1;
-//            $tags[0] = $database[0]['tag'];
-//
-//        $database[1]['id'] = 2;
-//        $database[1]['tag'] = "champagne";
-//        $database[1]['supplier_id']= 2;
-//        $tags[1] = $database[1]['tag'];
+            $database[0]['id'] = 1;
+           $database[0]['tag'] = "Champagnes";
+            $database[0]['supplier_id']= 1;
+            $tags[0] = $database[0]['tag'];
+
+        $database[1]['id'] = 2;
+        $database[1]['tag'] = "champagne";
+        $database[1]['supplier_id']= 2;
+        $tags[1] = $database[1]['tag'];
 
         $database[2]['id'] = 3;
         $database[2]['tag'] = "bonbon / chocolats";
         $database[2]['supplier_id']= 666;
         $tags[2] = $database[2]['tag'];
 
-//        $database[3]['id'] = 2;
-//        $database[3]['tag'] = "champagne";
-//        $database[3]['supplier_id']= 3;
-//        $tags[3] = $database[3]['tag'];
+        $database[3]['id'] = 2;
+        $database[3]['tag'] = "chamPagne";
+        $database[3]['supplier_id']= 3;
+        $tags[3] = $database[3]['tag'];
 
         $database[4]['id'] = 5;
         $database[4]['tag'] = "bonbons";
@@ -61,7 +62,7 @@
         $tags[5] = $database[5]['tag'];
 
         $database[6]['id'] = 7;
-        $database[6]['tag'] = "chocolat";
+        $database[6]['tag'] = "Chocolat";
         $database[6]['supplier_id']= 100;
         $tags[6] = $database[6]['tag'];
 
@@ -72,6 +73,7 @@
     //FAKE CSV FILE
         echo '<pre>', 'tags  : ',var_dump($tags), '</pre>';
         echo '<pre>', 'current database : ',var_dump($database), '</pre>';
+
         $tags_count = array_count_values($tags); //Classer les tags par fréquence
         asort($tags_count);
         $reversed_tags_count = array_reverse($tags_count);
@@ -82,20 +84,22 @@
             $lastElement = key($reversed_tags_count);
             foreach ($reversed_tags_count as $tag => $count) {
                 echo '<pre style="background-color: darkseagreen">', 'WORKING ON  : ',var_dump($tag), '</pre>';
+                echo '<pre>', 'current trash : ',var_dump($trash), '</pre>';
                 //echo '<pre style="background-color: darkseagreen">', 'TAGS STATUS  : ',var_dump($tags), '</pre>';
                 //Foreach qui va vérifier les tags dans l'odre de fréquence
 
                 if (preg_match('/[\&\,\/]/', $tag, $matches)) { //Les symboles / & et , sont remplacés par "et"
                     //echo '<pre style="background-color:orange">', '&/, Symbol detected in : ',var_dump($tag), '</pre>';
+
                     list($tags, $database) = $this->dismantleSlashedTags($tags, $tag, $matches, $database);
                     list($tags, $reversed_tags_count, $database) = $this->updateTagsArray($tags, $database );
+
                     break;
 
                 }
                 if(preg_match('/[A-Z]/', $tag)){
                     //echo '<pre style="background-color:orange">', 'Caps detected in : ',var_dump($tag), '</pre>';
                     $lowTag = $this->removeCaps($tag); //Retire les uppercase
-
                     list($tags, $reversed_tags_count, $database) = $this->updateTagsArray($tags, $database , $tag, $lowTag);
                     break;
 
@@ -173,7 +177,9 @@
 //        }
 //
 //        fclose($file);
+        dd($trash);
         return $tags;
+
     }
     public function reassignFormatedTag(array $database, array $array, int $tagKey, ?int $trueKey=null){
     $formatedTag = array();
@@ -297,7 +303,13 @@
         return $result;
 
     }
-    public function getSupplier(array $database, int $tagKey): int{
-        $supplier = $database[$tagKey]['supplier_id'];
-        return $supplier;
+    public function updateTrashWatcher(array $array, array $database, array $trash, string $string, string $replacer){
+        $stringKey = array_search($string, $array);
+        $replacerKey = array_search($replacer, $array);
+        $trash[$stringKey]['id'] = $database[$stringKey]['id'];
+        $trash[$stringKey]['tag'] = $database[$stringKey]['tag'];
+        $trash[$stringKey]['supplier_id'] = $database[$stringKey]['supplier_id'];
+        $trash[$stringKey]['replacedBy'] = $database[$replacerKey];
+        return $trash;
+
     }
